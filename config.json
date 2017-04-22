@@ -1,6 +1,24 @@
 {
 	"dataUrl": "https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json",
-	"width": 1000,
-	"height": 600,
-	"padding": 50
+	"width": 1200,
+	"height": 700,
+	"padding": 100,
+	"color": {
+		"cold": { "r": 0, "g": 0, "b": 255 },
+		"hot": { "r": 255, "g": 0, "b": 0 }
+	},
+	"months": [
+	    "Jan",
+	    "Feb",
+	    "Mar",
+	    "Apr",
+	    "May",
+	    "Jun",
+	    "Jul",
+	    "Aug",
+	    "Sep",
+	    "Oct",
+	    "Nov",
+	    "Dec"
+	]
 }
