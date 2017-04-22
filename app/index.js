@@ -6,9 +6,12 @@ import {
   color,
   months,
 } from '../config'
+import { MakeRounder, signify } from './utils'
 
 const d3 = require('d3')
-const d3tip = require('d3-tip')
+d3.tip = require('d3-tip')
+
+const toThreePlaces = MakeRounder(3)
 
 // purple 75 57 145
 // red 138 0 51
@@ -75,16 +78,94 @@ const display = function() {
   let yAxis = d3.axisLeft(yScale)
     .tickFormat((_, i) => months[i])
 
-  let tip = d3tip()
-    .offset([-10, 0])
+  let tip = d3
+    .tip()
+    .offset([4, 0])
+    .attr('class', 'tooltip')
     .html(function(d) {
-      return "<span style='color:red'>" + d.month + "</span>";
+      return '<div style="font-size: 0.7em">' + 
+        '<span style="text-transform:uppercase;font-weight:bold">' + 
+        months[d.month-1] + ' ' + d.year + '</span><br><span>' + 
+        toThreePlaces(base + d.variance) + '˚C</span><br><span>' +
+        signify(toThreePlaces(d.variance)) + '</span>' +
+        '</div>';
     })
+    .style('background-color', 'white')
+    .style('padding', '0.5em')
+    .style('outline', '1px solid black')
 
   let bounds = {
   	width: width - padding * 2,
   	height: height - padding * 2
   }
+
+  /*              *
+   *    TITLES    *
+   *              */
+
+  sg.append('text')
+    .text('Monthly Global Land-Surface Temperature')
+    .attr('text-anchor', 'middle')
+    .attr('x', width / 2)
+    .attr('y', 50)
+  sg.append('text')
+    .text('1753—2015')
+    .attr('text-anchor', 'middle')
+    .attr('x', width / 2)
+    .attr('y', 70)
+
+  let lg = sg
+    .append('defs')
+    .append('linearGradient')
+    .attr('id', 'variance')
+  
+  lg.append('stop')
+    .attr('offset', '5%')
+    .attr('stop-color', 'blue')
+  
+  lg.append('stop')
+    .attr('offset', '95%')
+    .attr('stop-color', 'red')
+
+  sg.append('rect')
+    .attr('fill', 'url(#variance)')
+    .attr('x', width - padding - 200)
+    .attr('y', padding*0.44)
+    .attr('width', 200)
+    .attr('height', 3)
+
+  sg.append('text')
+    .text('0.000')
+    .attr('x', width - padding - 200)
+    .attr('y', padding * 0.6)
+    .style('font-size', '0.7em')
+    .style('font-weight', 'bold')
+
+  sg.append('text')
+    .text(base + maxVariance)
+    .attr('text-anchor', 'end')
+    .attr('x', width - padding)
+    .attr('y', padding * 0.6)
+    .style('font-size', '0.7em')
+    .style('font-weight', 'bold')
+
+  sg.append('text')
+    .text('Year')
+    .attr('x', width/2)
+    .attr('y', height - padding / 2)
+    .attr('text-anchor', 'middle')
+    .style('font-weight', 'bold')
+    .style('font-size', '0.8em')
+    
+  sg.append("text")
+    .attr('transform', 'translate(' + -padding * 0.5 + ', ' + ((height + padding*2) / 2) + ')rotate(-90)')
+    .attr("x", padding)
+    .attr("y", padding)
+    .attr("text-anchor", "middle")
+    .style("font-size", "15px")
+    .text("Month")
+    .style('font-weight', 'bold')
+    .style('font-size', '0.8em')
 
   sg.selectAll('rect')
     .data(data)
@@ -93,7 +174,8 @@ const display = function() {
     .attr('x', d => xScale(d.year))
     .attr('y', d => yScale(d.month))
     .attr('width', bounds.width / (maxYear - minYear) )
-    .attr('height', bounds.height / (maxMonth - minMonth) - 4)
+    // match height with tweaked yScale's height
+    .attr('height', (height - padding * 1.5 - padding) / (maxMonth - minMonth))
     .attr('fill', d => heat(d.variance))
     .on('mouseover', tip.show)
     .on('mouseout', tip.hide)
